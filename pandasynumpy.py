@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-
+df = pd.read_csv('empleados.csv')
 
 # Calcular estadísticas usando NumPy sobre columnas de DataFrame
 df['edad_media'] = np.mean(df['edad'])
