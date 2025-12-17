@@ -4,7 +4,7 @@ import pandas as pd
 df = pd.read_csv('empleados.csv')
 
 # Mostrar primeras filas para verificar que por defecto son 5 filas
-# print(df.head())
+print(df.head())
 
 # # 2. Selección de columnas
 print(df['nombre'])              # Columna unidimensional (Series)
