@@ -87,6 +87,40 @@ print("Desviación estándar:", np.std(df['salario_anual']))
 # Realizar agrupaciones por ciudad, departamento y rango de edad (separadas): calcular métricas resumen.
 # ==========================================
 
+# -------------------------------------------------------------------------
+# Crear el DataFrame
+# -------------------------------------------------------------------------
+data = {
+    'nombre': ['Ana', 'Luis', 'Carlos', 'Marta', 'Jorge', 'Lucia'],
+    'edad': [25, 34, 42, 19, 28, 31],
+    'ciudad': ['Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Madrid', 'Barcelona'],
+    'departamento': ['IT', 'Marketing', 'Ventas', 'IT', 'Marketing', 'Ventas'],
+    'salario': [2500, 3200, 4000, 1800, 2800, 3000],
+    'fecha_ingreso': ['2020-01-01', '2018-05-15', '2015-09-30', '2021-03-20', '2019-07-10', '2017-11-05']
+}
+df = pd.DataFrame(data)
+
+# -------------------------------------------------------------------------
+# AGRUPACIONES
+# -------------------------------------------------------------------------
+df['rango_edad'] = 'Senior (36+)'
+df.loc[df['edad'] <= 25, 'rango_edad'] = 'Joven (hasta 25)'
+df.loc[(df['edad'] > 25) & (df['edad'] <= 35), 'rango_edad'] = 'Adulto Joven (26-35)'
+# -------------------------------------------------------------------------
+# Agrupación por CIUDAD
+resumen_ciudad = df.groupby('ciudad')['salario'].describe()
+print(resumen_ciudad)
+# -------------------------------------------------------------------------
+# Agrupación por DEPARTAMENTO
+resumen_depto = df.groupby('departamento')['salario'].mean()
+print(resumen_depto)
+# -------------------------------------------------------------------------
+# Agrupación por RANGO DE EDAD
+resumen_edad = df.groupby('rango_edad')['salario'].sum()
+print(resumen_edad)
+# -------------------------------------------------------------------------
+
+
 # ==========================================
 ## EJERCICIO 7 
 # Responded a las siguientes preguntas:
