@@ -103,21 +103,38 @@ df = pd.DataFrame(data)
 # -------------------------------------------------------------------------
 # AGRUPACIONES
 # -------------------------------------------------------------------------
-df['rango_edad'] = 'Senior (36+)'
-df.loc[df['edad'] <= 25, 'rango_edad'] = 'Joven (hasta 25)'
-df.loc[(df['edad'] > 25) & (df['edad'] <= 35), 'rango_edad'] = 'Adulto Joven (26-35)'
+
 # -------------------------------------------------------------------------
-# Agrupación por CIUDAD
+# Agrupación por CIUDAD y métricas
 resumen_ciudad = df.groupby('ciudad')['salario'].describe()
 print(resumen_ciudad)
 # -------------------------------------------------------------------------
-# Agrupación por DEPARTAMENTO
+# Agrupación por DEPARTAMENTO y métricas
 resumen_depto = df.groupby('departamento')['salario'].mean()
 print(resumen_depto)
 # -------------------------------------------------------------------------
-# Agrupación por RANGO DE EDAD
-resumen_edad = df.groupby('rango_edad')['salario'].sum()
-print(resumen_edad)
+# Agrupación por RANGO DE EDAD Senior, Adulto y Joven
+#creamos un narray de edades
+edades = df['edad'].values
+#Multiplicamos por 6 porque tenemos 6 edades y necesitamos 6 etiquetas para duplicar el array
+#Para evitar que solo deje un espacio de 12 caracteres que es lo que ocupa Senior (+36)
+# se añade --> dtype=object --> con esto le prohíbes a NumPy que mida el texto
+nombres_rangos = np.array(['Senior (36+)'] * len(edades), dtype=object)
+
+# Nuevos filtros para agrupar rangos de edad Joven o adulto
+es_joven = edades <= 25
+es_adulto = (edades > 25) & (edades <= 35)
+
+# Aplicamos los filtros usando INDEXACIÓN DIRECTA
+nombres_rangos[es_joven] = 'Joven (hasta 25)'
+nombres_rangos[es_adulto] = 'Adulto Joven (26-35)'
+
+# Devolvemos el array al DataFrame
+df['rango_edad'] = nombres_rangos
+
+#Agrupamos
+resumen_edad = df.groupby('rango_edad')['salario'].agg([np.sum, np.mean, np.std])
+print("\nMétricas resumen:\n", resumen_edad)
 # -------------------------------------------------------------------------
 
 
@@ -131,3 +148,45 @@ print(resumen_edad)
 # 7.3. Departamento con mayor salario promedio.
 # 7.4. Empleado con menos experiencia en la empresa.
 # 7.5. Empleados de marketing, de la ciudad de Barcelona y Madrid, que tengan más de 10 años de experiencia.
+
+# -------------------------------------------------------------------------
+# PREPARACIÓN PARA FECHAS (Punto 5.1)
+# -------------------------------------------------------------------------
+# Convertimos a datetime y calculamos la experiencia en años
+df['fecha_ingreso'] = pd.to_datetime(df['fecha_ingreso'])
+fecha_actual = pd.to_datetime('2025-12-29') # Fecha de hoy
+df['experiencia'] = (fecha_actual - df['fecha_ingreso']).dt.days / 365.25
+
+# -------------------------------------------------------------------------
+# RESPUESTAS
+# -------------------------------------------------------------------------
+
+# 7.1. Empleado más antiguo (El que tiene la fecha de ingreso menor)
+# Usamos idxmin() que devuelve el índice del valor mínimo
+empleado_antiguo = df.loc[df['fecha_ingreso'].idxmin(), 'nombre']
+print(f"7.1. Empleado más antiguo: {empleado_antiguo}")
+
+# 7.2. Ciudad con más empleados
+# value_counts() cuenta repeticiones y idxmax() nos da la que más tiene
+ciudad_top = df['ciudad'].value_counts().idxmax()
+print(f"7.2. Ciudad con más empleados: {ciudad_top}")
+
+# 7.3. Departamento con mayor salario promedio
+# Agrupamos y buscamos el máximo
+depto_top_salario = df.groupby('departamento')['salario'].mean().idxmax()
+print(f"7.3. Depto con mayor salario promedio: {depto_top_salario}")
+
+# 7.4. Empleado con menos experiencia
+# idxmax() en fecha (la fecha más reciente es la menor experiencia)
+empleado_novato = df.loc[df['fecha_ingreso'].idxmax(), 'nombre']
+print(f"7.4. Empleado con menos experiencia: {empleado_novato}")
+
+# 7.5. Marketing, Barcelona/Madrid y > 10 años experiencia
+# Combinamos filtros usando & (AND) y | (OR) del punto 2.6
+filtro_complejo = (df['departamento'] == 'Marketing') & \
+                  (df['ciudad'].isin(['Barcelona', 'Madrid'])) & \
+                  (df['experiencia'] > 10)
+
+empleados_filtrados = df[filtro_complejo]
+print("\n7.5. Empleados que cumplen el criterio complejo:")
+print(empleados_filtrados[['nombre', 'ciudad', 'experiencia']])
