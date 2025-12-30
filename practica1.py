@@ -190,3 +190,33 @@ filtro_complejo = (df['departamento'] == 'Marketing') & \
 empleados_filtrados = df[filtro_complejo]
 print("\n7.5. Empleados que cumplen el criterio complejo:")
 print(empleados_filtrados[['nombre', 'ciudad', 'experiencia']])
+
+#opcion 2 ejercicio 7
+#punto 4
+# Tomamos el año 2025 como referencia
+# Usamos x[:4] para agarrar los primeros 4 caracteres de la fecha (el año)
+df['experiencia'] = df['fecha_ingreso'].apply(lambda x: 2025 - int(x[:4]))
+
+#punto 5
+# Crear salario anual (Operación vectorizada de la sección 2.6 de tu teoría)
+df['salario_anual'] = df['salario'] * 12
+
+# Antigüedad simplificada (asumiendo año 2025)
+# Usamos apply como sugiere tu tabla de métodos de Pandas
+df['antigüedad'] = df['fecha_ingreso'].apply(lambda x: 2025 - int(x[:4]))
+
+# Estadísticas con NumPy (Sección 2.7)
+media_salarial = np.mean(df['salario'])
+desviacion = np.std(df['salario'])
+
+# Agrupación por departamento
+resumen_depto = df.groupby('departamento')['salario'].mean()
+print(resumen_depto)
+
+# Filtro: Marketing Y (Madrid o Barcelona) Y antigüedad > 10
+# Nota: La teoría menciona "Filtrar registros con condiciones"
+filtro = (df['departamento'] == 'Marketing') & \
+         (df['ciudad'].isin(['Madrid', 'Barcelona'])) & \
+         (df['antigüedad'] > 10)
+
+resultado = df[filtro]
